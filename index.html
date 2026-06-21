@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700&display=swap');
+        body { font-family: 'Noto Sans Arabic', Tahoma, sans-serif; background-color: #f3f4f6; }
+        .step-container { display: none; }
+        .step-container.active { display: block; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col items-center justify-center">
+
+    <!-- Global Shared Loader -->
+    <div id="globalLoader" class="fixed inset-0 bg-white/95 z-[99] flex flex-col items-center justify-center p-6 hidden">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-gray-700 font-semibold text-lg" id="loaderText">چاوەڕوان بە...</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- LOGIN SELECTOR                             -->
+    <!-- ========================================== -->
+    <div id="loginSelector" class="max-w-sm w-full bg-white rounded-2xl shadow-xl overflow-hidden mb-4">
+        <div class="bg-gradient-to-r from-blue-700 to-slate-800 p-5 text-white text-center">
+            <p class="text-xs uppercase tracking-wider opacity-80 font-semibold mb-1">زانکۆی ڕاپەڕین - بەشی زمانی ئینگلیزی</p>
+            <h2 class="text-xl font-bold">بەخێربێیت — چۆنیەتی چوونەژوورەوە هەڵبژێرە</h2>
+        </div>
+        <div class="p-6 grid grid-cols-2 gap-4">
+            <button onclick="enterAsStudent()" class="flex flex-col items-center gap-3 p-5 border-2 border-blue-200 rounded-xl hover:bg-blue-50 hover:border-blue-500 transition-all group">
+                <span class="text-4xl">🎓</span>
+                <span class="font-bold text-blue-700 text-sm">فێرخواز</span>
+                <span class="text-[10px] text-gray-400 text-center">تۆمارکردنی گرووپی دەرچوون</span>
+            </button>
+            <button onclick="enterAsAdmin()" class="flex flex-col items-center gap-3 p-5 border-2 border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-500 transition-all group">
+                <span class="text-4xl">🔒</span>
+                <span class="font-bold text-slate-700 text-sm">بەڕێوەبەر</span>
+                <span class="text-[10px] text-gray-400 text-center">پانێڵی بەڕێوەبەری بەشەکە</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STUDENT REGISTRATION VIEW                  -->
+    <!-- ========================================== -->
+    <div id="registrationView" class="max-w-xl w-full bg-white rounded-2xl shadow-xl overflow-hidden relative hidden">
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <p class="text-sm uppercase tracking-wider opacity-90 font-semibold mb-1">زانکۆی ڕاپەڕین - بەشی زمانی ئینگلیزی</p>
+            <h2 class="text-2xl font-bold">تۆمارکردنی گرووپی دەرچوون</h2>
+        </div>
+
+        <div class="p-8">
+            <div id="step1" class="step-container active">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">١. زانیاری و ئیمەیڵی ئەندامانی گرووپ</h3>
+                <p class="text-xs text-gray-500 mb-4 leading-relaxed">تکایە ئیمەیڵی سەرۆک و ئەندامانی تری گرووپ بنووسە. بۆ چوونە ژوورەوەی بەڕێوەبەر، تەنها ئیمەیڵی بەڕێوەبەر لە خانەی یەکەم بنووسە.</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">ئیمەیڵی سەرۆکی گرووپ (یەکەم):</label>
+                        <input type="email" id="email1" oninput="resolveStudentNames()" placeholder="uor@english.edu / example@uor.edu.krd" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <span id="nameLabel1" class="text-xs text-blue-600 font-bold mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">ئیمەیڵی ئەندامی دووەم:</label>
+                        <input type="email" id="email2" oninput="resolveStudentNames()" placeholder="example@uor.edu.krd" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <span id="nameLabel2" class="text-xs text-blue-600 font-bold mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">ئیمەیڵی ئەندامی سێیەم:</label>
+                        <input type="email" id="email3" oninput="resolveStudentNames()" placeholder="example@uor.edu.krd" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <span id="nameLabel3" class="text-xs text-blue-600 font-bold mt-1 block"></span>
+                    </div>
+                </div>
+                <div id="error1" class="text-red-500 text-sm hidden mt-4 bg-red-50 p-3 rounded-lg border border-red-200"></div>
+            </div>
+
+            <div id="step2" class="step-container">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">٢. هەڵبژاردنی پسپۆڕی توێژینەوە</h3>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button type="button" id="catBtnLinguistics" onclick="selectCategory('Linguistics')" class="p-4 border-2 rounded-xl text-lg font-semibold hover:bg-blue-50 border-gray-200 transition-all">Linguistics</button>
+                    <button type="button" id="catBtnLiterature" onclick="selectCategory('Literature')" class="p-4 border-2 rounded-xl text-lg font-semibold hover:bg-purple-50 border-gray-200 transition-all">Literature</button>
+                </div>
+                <div id="teacherDisplay" class="hidden bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto custom-scrollbar">
+                    <p class="font-bold mb-3 text-gray-700 text-sm">زانیاری مامۆستایانی بەش:</p>
+                    <div id="teacherList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div id="step3" class="step-container">
+                <h3 class="text-lg font-bold mb-2 text-gray-800">٣. هەڵبژاردنی ناونیشانی توێژینەوە</h3>
+                <p class="text-xs text-gray-500 mb-4">ناونیشانە تۆمارکراوەکان بە تەواوی شاراوەن و لێرە دەرناکەون.</p>
+                <div id="titleContainer" class="space-y-2 h-64 overflow-y-auto pr-2 custom-scrollbar"></div>
+            </div>
+
+            <div id="step4" class="step-container">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">٤. پێداچوونەوە و پەسەندکردنی کۆتایی</h3>
+                <div id="summaryContent" class="bg-blue-50 border border-blue-200 p-5 rounded-xl text-sm space-y-3 text-gray-800"></div>
+                <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 space-x-reverse text-xs text-green-800">
+                    <span class="text-base">📬</span>
+                    <span>دوای تۆمارکردن، ناوی سەرپەرشتیار ئاشکرا دەکرێت و ئیمەیڵ دەنێردرێت.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t flex justify-between">
+            <button id="prevBtn" onclick="navigate(-1)" class="hidden px-6 py-2 border border-gray-300 hover:bg-gray-100 rounded-lg font-medium transition-colors">گەڕانەوە</button>
+            <button id="nextBtn" onclick="navigate(1)" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">دواتر</button>
+            <button id="submitBtn" onclick="submit()" class="hidden px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">تۆمارکردن</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ADMIN DASHBOARD VIEW                       -->
+    <!-- ========================================== -->
+    <div id="adminView" class="hidden max-w-7xl w-full mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <div class="bg-slate-900 p-6 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800">
+            <div>
+                <p class="text-xs uppercase tracking-wider opacity-80 font-semibold mb-1">کۆنتڕۆڵ و بەڕێوەبردن</p>
+                <h1 class="text-2xl font-bold">پانێڵی بەڕێوەبەری بەشی زمانی ئینگلیزی</h1>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                <button id="toggleTeacherVisibilityBtn" onclick="toggleTeacherVisibility()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold transition-all">بارکردن...</button>
+                <button onclick="fetchLatestData()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold transition-all">🔄 نوێکردنەوە</button>
+                <button onclick="exitAdmin()" class="px-4 py-2 bg-slate-800 hover:bg-red-600 border border-slate-700 rounded-lg text-sm font-semibold transition-all">🚪 چوونەدەرەوە</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 bg-slate-50 border-b border-slate-100">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold mb-1">گرووپە تۆمارکراوەکان</div>
+                <div id="statRegistered" class="text-3xl font-bold text-slate-900">-</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold mb-1">ناونیشانە جێگیرکراوەکان</div>
+                <div id="statTaken" class="text-3xl font-bold text-emerald-600">-</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-slate-500 text-xs font-semibold mb-1">سەرجەم ناونیشانەکان</div>
+                <div id="statTotal" class="text-3xl font-bold text-blue-600">-</div>
+            </div>
+        </div>
+
+        <div class="flex border-b border-slate-200 bg-white overflow-x-auto">
+            <button onclick="switchTab('registrations')" id="tabBtn_registrations" class="px-6 py-3 border-b-2 border-blue-600 font-bold text-sm text-blue-600 whitespace-nowrap">گرووپە تۆمارکراوەکان</button>
+            <button onclick="switchTab('evaluators')" id="tabBtn_evaluators" class="px-6 py-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-800 whitespace-nowrap">لیژنەی هەڵسەنگاندن (دابەشکردن)</button>
+            <button onclick="switchTab('teachers')" id="tabBtn_teachers" class="px-6 py-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-800 whitespace-nowrap">بەڕێوەبردنی بابەتەکان</button>
+            <button onclick="switchTab('remaining')" id="tabBtn_remaining" class="px-6 py-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-800 whitespace-nowrap">تۆمارنەکراوەکان (ماوەکان)</button>
+        </div>
+
+        <div class="p-6">
+            <!-- Admin Tab 1: Registrations -->
+            <div id="tab_registrations" class="space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="text-lg font-bold text-slate-800">لیستی سەرجەم گرووپە تۆمارکراوەکان</h3>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- ===== DOWNLOAD BUTTONS ===== -->
+                        <button onclick="downloadRegistrationsAsExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">📊 داگرتن بە Excel</button>
+                        <button onclick="downloadRegistrationsAsWord()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">📄 داگرتن بە Word</button>
+                        <!-- ============================= -->
+                        <input type="text" id="regSearch" oninput="filterRegistrations()" placeholder="گەڕان بەپێی سەرۆک، بابەت، یان مامۆستا..." class="p-2 border border-slate-300 rounded-lg text-sm w-full md:w-80 outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar">
+                    <table class="w-full text-sm text-right text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-3 border-b">ناوی گرووپ (ئەندامان)</th>
+                                <th class="px-4 py-3 border-b">ناونیشانی زانستی</th>
+                                <th class="px-4 py-3 border-b">ناوی سەرپەرشتیار</th>
+                                <th class="px-4 py-3 border-b">ئیمەیڵی مامۆستا</th>
+                                <th class="px-4 py-3 border-b">ناونیشانی توێژینەوە</th>
+                                <th class="px-4 py-3 border-b">کاتی تۆمارکردن</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrationsTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Tab 2: Evaluators -->
+            <div id="tab_evaluators" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-100 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <h4 class="font-bold text-slate-950 text-base">دابەشکردنی لۆدی هەڵسەنگاندن و تاوتوێکردن</h4>
+                        <p class="text-xs text-slate-600 mt-1">بۆ ناردنی زانیارییەکان بۆ لیژنەی هەڵسەنگاندن، ئەرکەکە جێگیربکە پاشان کلیک لە "✉️ ناردنی ئیمەیڵ" بکە بۆ هەر گرووپێکی دیاریکراو.</p>
+                    </div>
+                    <div>
+                        <button onclick="triggerAutoDistribution()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-md transition-all">⚡ دابەشکردنی ئۆتۆماتیکی هاوسەنگ</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column: Registered Titles Table with Evaluator Dropdowns & Email Triggers -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base">دیاریکردنی هەڵسەنگێنەر بۆ گرووپەکان</h3>
+                        <div class="space-y-3 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar" id="evaluationsSelectorContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Load Leaderboard with Dynamic Color Grades -->
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base">ڕیزبەندی لۆدی مامۆستایان (سەرپەرشتی + هەڵسەنگاندن)</h3>
+                        <p class="text-xs text-slate-500">ڕەنگەکە بەپێی کەم و زۆری لۆدی سەرپەرشتی و هەڵسەنگاندن لە سەوزەوە بۆ سوور دەگۆڕێت.</p>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3" id="loadLeaderboardContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab 3: Teachers -->
+            <div id="tab_teachers" class="space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <div>
+                        <h4 class="font-bold text-blue-900 text-sm">زیادکردنی بابەتێکی نوێ</h4>
+                        <p class="text-xs text-blue-700 mt-1">مامۆستایەک دەستنیشان بکە بۆ زیادکردنی ناونیشانی نوێ.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <select id="teacherSelectInput" class="p-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-500 outline-none w-48"></select>
+                        <input type="text" id="newTopicInput" placeholder="ناونیشانی نوێ لێرە بنووسە..." class="p-2 border border-slate-300 rounded-lg text-xs w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="addNewTopic()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition-all">➕ زیادکردن</button>
+                    </div>
+                </div>
+
+                <!-- Taken Titles Table -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="flex items-center justify-between px-5 py-3 bg-emerald-100 border-b border-emerald-200">
+                        <h3 class="font-bold text-emerald-900 text-sm flex items-center gap-2">✅ ناونیشانە جێگیرکراوەکان</h3>
+                        <span id="takenTitlesCount" class="bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">0</span>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar max-h-64">
+                        <table class="w-full text-sm text-right">
+                            <thead class="bg-emerald-100 text-emerald-800 text-xs sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-2.5 border-b border-emerald-200">#</th>
+                                    <th class="px-4 py-2.5 border-b border-emerald-200">ناونیشانی توێژینەوە</th>
+                                    <th class="px-4 py-2.5 border-b border-emerald-200">ناوی سەرپەرشتیار</th>
+                                    <th class="px-4 py-2.5 border-b border-emerald-200">گرووپی هەڵبژاردووە</th>
+                                </tr>
+                            </thead>
+                            <tbody id="takenTitlesTableBody" class="divide-y divide-emerald-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h3 class="text-lg font-bold text-slate-800">لیستی بابەتەکانی هەر سەرپەرشتیارێک</h3>
+                        <div class="flex gap-2">
+                            <button onclick="downloadTopicsAsExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">📊 داگرتن بە Excel</button>
+                            <button onclick="downloadTopicsAsWord()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">📄 داگرتن بە Word</button>
+                        </div>
+                    </div>
+                    <div id="teachersGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- Admin Tab 4: Unregistered / Remaining -->
+            <div id="tab_remaining" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                        <div class="bg-red-50 p-4 border-b border-red-100 flex justify-between items-center">
+                            <h4 class="font-bold text-red-900 text-sm">فێرخوازە تۆمارنەکراوەکان</h4>
+                            <span id="unregisteredStudentsCount" class="bg-red-200 text-red-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
+                        </div>
+                        <div id="unregisteredStudentsList" class="divide-y divide-slate-100 h-96 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                        <div class="bg-blue-50 p-4 border-b border-blue-100 flex justify-between items-center">
+                            <h4 class="font-bold text-blue-900 text-sm">مامۆستا هەڵنەبژێردراوەکان</h4>
+                            <span id="unselectedTeachersCount" class="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">0</span>
+                        </div>
+                        <div id="unselectedTeachersList" class="divide-y divide-slate-100 h-96 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin PIN Modal -->
+    <div id="adminPinModal" class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl p-7 max-w-xs w-full text-center shadow-2xl">
+            <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center rounded-full bg-slate-100 text-4xl">🔒</div>
+            <h4 class="text-lg font-bold text-gray-900 mb-1">چوونەژوورەوەی بەڕێوەبەر</h4>
+            <p class="text-xs text-gray-500 mb-4">تکایە ئیمەیڵ یان پاسوەردی بەڕێوەبەری بنووسە</p>
+            <input type="password" id="adminPinInput" onkeydown="if(event.key==='Enter') checkAdminPin()" placeholder="ئیمەیڵ یان پاسوەرد..." class="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-slate-500 outline-none mb-2 text-center">
+            <p id="adminPinError" class="text-red-500 text-xs mb-3 hidden">ئیمەیڵ یان پاسوەرد هەڵەیە. دووبارە هەوڵبدەرەوە.</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="document.getElementById('adminPinModal').classList.add('hidden'); document.getElementById('adminPinInput').value=''; document.getElementById('adminPinError').classList.add('hidden');" class="py-2 border border-gray-300 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors">گەڕانەوە</button>
+                <button onclick="checkAdminPin()" class="py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-semibold transition-colors">چوونەژوورەوە</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div id="modalIcon" class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full text-3xl"></div>
+            <h4 id="modalTitle" class="text-lg font-bold text-gray-900 mb-2"></h4>
+            <p id="modalBody" class="text-sm text-gray-600 mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">باشە</button>
+        </div>
+    </div>
+
+    <script>
+        let appData = null;
+        const ADMIN_EMAIL = 'admin@english.edu';
+
+        // --- NEW API CONFIGURATION ---
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby-IkTxcc7nHChOisNQ0ij8hMyqvQiHk0wcWjoHtOFONX6IEZMIzIewUOXwpHQ2eScr6g/exec";
+
+        const apiCall = async (action, payload = {}) => {
+          try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+              method: 'POST',
+              body: JSON.stringify({ action, payload })
+            });
+            const result = await response.json();
+            if (result && result.error) throw new Error(result.error);
+            return result;
+          } catch (error) {
+            console.error("API Error:", error);
+            throw error;
+          }
+        };
+        // -----------------------------
+        let currentStep = 1, selectedCat = '', selectedTitle = null, selectedTeacher = null, selectedTeacherTitle = '';
+        let adminTab = 'registrations';
+
+        window.onload = () => { fetchLatestData(); };
+
+        // ==========================================
+        // LOGIN / NAVIGATION
+        // ==========================================
+        function enterAsStudent() {
+            document.getElementById('loginSelector').classList.add('hidden');
+            document.getElementById('registrationView').classList.remove('hidden');
+        }
+
+        function enterAsAdmin() {
+            document.getElementById('adminPinModal').classList.remove('hidden');
+        }
+
+        function checkAdminPin() {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (pin === 'admin@english.edu' || pin === '2025admin') {
+                document.getElementById('adminPinModal').classList.add('hidden');
+                document.getElementById('adminPinInput').value = '';
+                showAdminView();
+            } else {
+                document.getElementById('adminPinError').classList.remove('hidden');
+            }
+        }
+
+        // ==========================================
+        // LOADER
+        // ==========================================
+        function showLoader(text) { document.getElementById('loaderText').textContent = text; document.getElementById('globalLoader').style.display = 'flex'; }
+        function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
+
+        function submit() {
+            const payload = { email1: document.getElementById('email1').value.trim(), email2: document.getElementById('email2').value.trim(), email3: document.getElementById('email3').value.trim(), category: selectedCat, teacher: selectedTeacher, title: selectedTitle };
+            showLoader('ناردنی زانیارییەکان و تۆمارکردن...');
+            apiCall('submitRegistration', { payload }).then(() => {
+                hideLoader(); showModal("تۆمارکردن سەرکەوتوو بوو", "گرووپەکەتان بە سەرکەوتوویی تۆمارکرا و ئیمەیڵتان بۆ نێردرا!", "✔️", "bg-green-100 text-green-600");
+                ['email1', 'email2', 'email3'].forEach(id => document.getElementById(id).value = '');
+                ['nameLabel1', 'nameLabel2', 'nameLabel3'].forEach(id => document.getElementById(id).textContent = '');
+                selectedCat = ''; selectedTitle = null; selectedTeacher = null; selectedTeacherTitle = ''; currentStep = 1;
+                document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active');
+                document.getElementById('teacherDisplay').classList.add('hidden');
+                updateUI(); fetchLatestData();
+            }).catch(err => { 
+                hideLoader(); showModal("هەڵە ڕوویدا", "تۆمارکردن سەرکەوتوو نەبوو: " + err.toString(), "❌", "bg-red-100 text-red-600"); 
+            });
+        }
+
+        // ==========================================
+        // REGISTRATION LOGIC
+        // ==========================================
+        function resolveStudentNames() {
+            if (!appData) return;
+            const emails = [
+                document.getElementById('email1').value.trim().toLowerCase(),
+                document.getElementById('email2').value.trim().toLowerCase(),
+                document.getElementById('email3').value.trim().toLowerCase()
+            ];
+
+            if (emails[0] === ADMIN_EMAIL) {
+                document.getElementById('nameLabel1').textContent = `🔒 چوونەژوورەوەی بەڕێوەبەر (دواتر دابگرە)`;
+                document.getElementById('nameLabel1').className = "text-xs text-purple-600 font-bold mt-1 block";
+                return;
+            }
+
+            emails.forEach((email, index) => {
+                const label = document.getElementById(`nameLabel${index + 1}`);
+                label.className = "text-xs text-blue-600 font-bold mt-1 block";
+                if (email && appData.studentDb[email]) label.textContent = `👤 ناو: ${appData.studentDb[email]}`;
+                else if (email) label.textContent = `⚠️ ئیمەیڵ لە داتابەیسەکە نییە`;
+                else label.textContent = ``;
+            });
+        }
+
+        function selectCategory(cat) {
+            selectedCat = cat; selectedTitle = null;
+            document.getElementById('catBtnLinguistics').className = cat === 'Linguistics' ? "p-4 border-2 rounded-xl text-lg font-semibold bg-blue-500 border-blue-600 text-white shadow-md transition-all" : "p-4 border-2 rounded-xl text-lg font-semibold hover:bg-blue-50 border-gray-200 text-gray-700 transition-all";
+            document.getElementById('catBtnLiterature').className = cat === 'Literature' ? "p-4 border-2 rounded-xl text-lg font-semibold bg-purple-600 border-purple-700 text-white shadow-md transition-all" : "p-4 border-2 rounded-xl text-lg font-semibold hover:bg-purple-50 border-gray-200 text-gray-700 transition-all";
+
+            const list = document.getElementById('teacherList'); list.innerHTML = '';
+
+            appData.teachers[cat].forEach(t => {
+                const displayName = (t.academicTitle ? t.academicTitle + " " : "") + t.name;
+                list.innerHTML += `<div class="flex flex-col p-2 bg-white rounded-lg border border-gray-100 shadow-sm"><span class="font-semibold text-gray-800">${displayName}</span><span class="text-xs text-blue-600 font-mono">${t.email || 'ئیمەیڵ بەردەست نییە'}</span></div>`;
+            });
+
+            document.getElementById('teacherDisplay').classList.remove('hidden');
+        }
+
+        function navigate(dir) {
+            if (dir === 1 && currentStep === 1 && document.getElementById('email1').value.trim().toLowerCase() === ADMIN_EMAIL) {
+                showAdminView(); return;
+            }
+
+            if (dir === 1 && !validate()) return;
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep += dir;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateUI();
+        }
+
+        function validate() {
+            const errorDiv = document.getElementById('error1'); errorDiv.classList.add('hidden');
+            if (currentStep === 1) {
+                const emails = [document.getElementById('email1').value.trim().toLowerCase(), document.getElementById('email2').value.trim().toLowerCase(), document.getElementById('email3').value.trim().toLowerCase()];
+                if (emails.some(e => e === "")) { showError("تکایە سەرجەم ئیمەیڵەکانی گرووپ پڕ بکەرەوە."); return false; }
+                if ([...new Set(emails)].length < emails.length) { showError("هەڵە: ناتوانیت هەمان ئیمەیڵ زیاتر لە جارێک بنووسیت."); return false; }
+                const invalidEmails = emails.filter(e => !appData.validEmails.includes(e));
+                if (invalidEmails.length > 0) { showError("ئەم ئیمەیڵانە ڕێگەپێنەدراون: " + invalidEmails.join(', ')); return false; }
+
+                const registeredNamesLower = appData.registeredStudents.map(n => n.toLowerCase().trim());
+                for (let email of emails) {
+                    const studentName = appData.studentDb[email];
+                    if (studentName && registeredNamesLower.includes(studentName.toLowerCase().trim())) { showError(`فێرخواز (${studentName}) پێشتر ناوی تۆمار کراوە.`); return false; }
+                }
+                return true;
+            }
+            if (currentStep === 2 && !selectedCat) { showModal("ئاگاداری", "تکایە پسپۆڕییەک دیاریبکە.", "⚠️", "bg-amber-100 text-amber-600"); return false; }
+            if (currentStep === 3 && !selectedTitle) { showModal("ئاگاداری", "تکایە ناونیشانێک دیاریبکە.", "⚠️", "bg-amber-100 text-amber-600"); return false; }
+            return true;
+        }
+
+        function showError(msg) { const errorDiv = document.getElementById('error1'); errorDiv.textContent = msg; errorDiv.classList.remove('hidden'); }
+
+        function updateUI() {
+            document.getElementById('prevBtn').classList.toggle('hidden', currentStep === 1);
+            document.getElementById('nextBtn').classList.toggle('hidden', currentStep === 4);
+            document.getElementById('submitBtn').classList.toggle('hidden', currentStep !== 4);
+
+            if (currentStep === 3) {
+                const container = document.getElementById('titleContainer'); container.innerHTML = ''; let titleCount = 0;
+                let availableTitles = [];
+
+                appData.teachers[selectedCat].forEach(t => {
+                    t.titles.forEach(title => {
+                        if (!appData.takenTitles.some(taken => taken.toLowerCase().trim() === title.toLowerCase().trim())) {
+                            availableTitles.push({ title: title, teacherName: t.name, academicTitle: t.academicTitle });
+                        }
+                    });
+                });
+
+                if (appData.hideTeachers) {
+                    availableTitles.sort((a, b) => a.title.localeCompare(b.title));
+                }
+
+                availableTitles.forEach(item => {
+                    titleCount++;
+                    const displayTeacher = appData.hideTeachers ? "شاراوەیە (تەنها ناونیشان دیارە)" : (item.academicTitle ? item.academicTitle + " " : "") + item.teacherName;
+                    container.innerHTML += `
+                        <label class="flex p-3 border rounded-lg cursor-pointer hover:bg-gray-50 items-center">
+                            <input type="radio" name="title" value="${item.title}" data-teacher="${item.teacherName}" data-title="${item.academicTitle || ''}" onchange="selectTitle(this)" class="ml-3 h-4 w-4 text-blue-600">
+                            <div class="flex-1 text-right">
+                                <div class="text-sm font-semibold text-gray-800">${item.title}</div>
+                                <div class="text-xs ${appData.hideTeachers ? 'text-amber-600 font-semibold' : 'text-gray-500'}">سەرپەرشتیار: ${displayTeacher}</div>
+                            </div>
+                        </label>`;
+                });
+
+                if (titleCount === 0) container.innerHTML = `<div class="p-6 text-center text-gray-500">سەرجەم ناونیشانەکانی ئەم بوارە پێشتر تۆمارکراون.</div>`;
+            }
+
+            if (currentStep === 4) {
+                const names = [document.getElementById('email1').value, document.getElementById('email2').value, document.getElementById('email3').value].map(e => appData.studentDb[e.toLowerCase().trim()] || e);
+                const displaySupervisor = appData.hideTeachers ? "شاراوەیە (لە ئیمەیڵی پشتڕاستکردنەوە ئاشکرا دەکرێت)" : (selectedTeacherTitle ? selectedTeacherTitle + " " : "") + selectedTeacher;
+
+                document.getElementById('summaryContent').innerHTML = `
+                    <div class="grid grid-cols-3 gap-2 border-b pb-3 mb-3 border-blue-200"><span class="font-semibold text-gray-600 text-xs col-span-1">ئەندامانی گرووپ:</span><div class="col-span-2 space-y-1 font-bold text-gray-900 text-xs"><p>١. ${names[0]} (سەرۆک)</p><p>٢. ${names[1]}</p><p>٣. ${names[2]}</p></div></div>
+                    <div class="flex justify-between text-xs border-b pb-3 mb-3 border-blue-200"><span class="font-semibold text-gray-600">پسپۆڕی:</span><span class="font-bold text-blue-700">${selectedCat}</span></div>
+                    <div class="flex justify-between text-xs border-b pb-3 mb-3 border-blue-200"><span class="font-semibold text-gray-600">سەرپەرشتیار:</span><span class="font-bold text-gray-900">${displaySupervisor}</span></div>
+                    <div class="flex flex-col text-xs space-y-1"><span class="font-semibold text-gray-600">ناونیشانی توێژینەوە:</span><span class="font-bold text-gray-900 bg-white p-2.5 rounded border border-blue-100 italic select-all">${selectedTitle}</span></div>`;
+            }
+        }
+
+        function selectTitle(el) { selectedTitle = el.value; selectedTeacher = el.dataset.teacher; selectedTeacherTitle = el.getAttribute('data-title') || ''; }
+
+        function submit() {
+            const payload = { email1: document.getElementById('email1').value.trim(), email2: document.getElementById('email2').value.trim(), email3: document.getElementById('email3').value.trim(), category: selectedCat, teacher: selectedTeacher, title: selectedTitle };
+            showLoader('ناردنی زانیارییەکان و تۆمارکردن...');
+            google.script.run.withSuccessHandler(() => {
+                hideLoader(); showModal("تۆمارکردن سەرکەوتوو بوو", "گرووپەکەتان بە سەرکەوتوویی تۆمارکرا و ئیمەیڵتان بۆ نێردرا!", "✔️", "bg-green-100 text-green-600");
+                ['email1', 'email2', 'email3'].forEach(id => document.getElementById(id).value = '');
+                ['nameLabel1', 'nameLabel2', 'nameLabel3'].forEach(id => document.getElementById(id).textContent = '');
+                selectedCat = ''; selectedTitle = null; selectedTeacher = null; selectedTeacherTitle = ''; currentStep = 1;
+                document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active');
+                document.getElementById('teacherDisplay').classList.add('hidden');
+                updateUI(); fetchLatestData();
+            }).withFailureHandler(err => { hideLoader(); showModal("هەڵە ڕوویدا", "تۆمارکردن سەرکەوتوو نەبوو: " + err, "❌", "bg-red-100 text-red-600"); }).submitRegistration(payload);
+        }
+
+        // ==========================================
+        // ADMIN LOGIC
+        // ==========================================
+        function showAdminView() {
+            document.body.classList.replace('bg-f3f4f6', 'bg-slate-50');
+            // FIX: hide the login selector when entering admin panel
+            document.getElementById('loginSelector').classList.add('hidden');
+            document.getElementById('registrationView').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+            document.getElementById('email1').value = ''; document.getElementById('nameLabel1').textContent = '';
+            renderDashboard();
+        }
+
+        function exitAdmin() {
+            document.body.classList.replace('bg-slate-50', 'bg-f3f4f6');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('registrationView').classList.add('hidden');
+            document.getElementById('loginSelector').classList.remove('hidden');
+            currentStep = 1; document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active'); updateUI();
+        }
+
+        function updateAdminVisibilityToggle() {
+            const btn = document.getElementById('toggleTeacherVisibilityBtn');
+            if(!btn || !appData) return;
+            if (appData.hideTeachers) {
+                btn.innerHTML = '🙈 مامۆستایان: شاراوە';
+                btn.className = 'px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md';
+            } else {
+                btn.innerHTML = '👁️ مامۆستایان: دیارە';
+                btn.className = 'px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md';
+            }
+        }
+
+        function toggleTeacherVisibility() {
+            if (!appData) return;
+            const newState = !appData.hideTeachers;
+            showLoader('گۆڕینی دۆخی دەرکەوتنی مامۆستایان...');
+            apiCall('setTeacherVisibility', { isHidden: newState })
+                .then((res) => {
+                    appData.hideTeachers = res;
+                    updateAdminVisibilityToggle();
+                    hideLoader();
+                    showModal("سەرکەوتوو بوو", newState ? "ناوی مامۆستایان شاردرایەوە لە فێرخوازان لە کاتی هەڵبژاردنی ناونیشان." : "ناوی مامۆستایان ئاشکرا کرا بۆ فێرخوازان.", "✔️", "bg-green-100 text-green-600");
+                })
+                .catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+        }
+
+        function switchTab(tabId) {
+            adminTab = tabId;
+            ['registrations', 'teachers', 'remaining', 'evaluators'].forEach(id => {
+                document.getElementById('tab_' + id).classList.toggle('hidden', tabId !== id);
+                document.getElementById('tabBtn_' + id).className = tabId === id ? "px-6 py-3 border-b-2 border-blue-600 font-bold text-sm text-blue-600 whitespace-nowrap" : "px-6 py-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-800 whitespace-nowrap";
+            });
+        }
+
+        function renderDashboard() {
+            if (!appData) return;
+            let totalTopics = 0; const teachersList = [];
+            const allTeachers = [...appData.teachers.Linguistics, ...appData.teachers.Literature];
+            allTeachers.forEach(t => { totalTopics += t.titles.length; teachersList.push(t); });
+
+            document.getElementById('statRegistered').textContent = appData.registrationsList.length;
+            document.getElementById('statTaken').textContent = appData.takenTitles.length;
+            document.getElementById('statTotal').textContent = totalTopics;
+
+            renderRegistrationsTable(appData.registrationsList);
+
+            const select = document.getElementById('teacherSelectInput');
+            select.innerHTML = '<option value="">هەڵبژاردنی مامۆستا...</option>';
+            teachersList.forEach(t => select.innerHTML += `<option value="${t.name}">${t.name}</option>`);
+
+            renderTeachersGrid(teachersList);
+            renderTakenTitlesTable();
+            renderRemainingViews(teachersList, appData);
+            renderEvaluatorDashboard(teachersList, appData.registrationsList);
+        }
+
+        function renderRegistrationsTable(list) {
+            const tbody = document.getElementById('registrationsTableBody'); tbody.innerHTML = '';
+            if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">هیچ گرووپێک تۆمار نەکراوە تا ئێستا.</td></tr>`; return; }
+            list.forEach(r => { tbody.innerHTML += `<tr class="hover:bg-slate-50 transition-colors"><td class="px-4 py-3 font-semibold text-slate-800">${r.groupName}</td><td class="px-4 py-3">${r.academicTitle || '<span class="text-slate-400">نییە</span>'}</td><td class="px-4 py-3 font-bold text-blue-700">${r.teacher}</td><td class="px-4 py-3 font-mono text-xs select-all">${r.teacherEmail}</td><td class="px-4 py-3 text-slate-700 italic font-semibold">${r.title}</td><td class="px-4 py-3 text-slate-500 text-xs">${r.timestamp}</td></tr>`; });
+        }
+
+        function filterRegistrations() {
+            const query = document.getElementById('regSearch').value.toLowerCase().trim();
+            renderRegistrationsTable(appData.registrationsList.filter(r => r.groupName.toLowerCase().includes(query) || r.teacher.toLowerCase().includes(query) || r.title.toLowerCase().includes(query) || r.teacherEmail.toLowerCase().includes(query)));
+        }
+
+        function renderTeachersGrid(teachersList) {
+            const grid = document.getElementById('teachersGrid'); grid.innerHTML = '';
+            teachersList.forEach(t => {
+                let topicsHtml = '';
+                if (t.titles.length === 0) topicsHtml = '<p class="text-xs text-slate-400 italic">هیچ ناونیشانێک تۆمار نەکراوە لێرە.</p>';
+                else t.titles.forEach(title => {
+                    const isTaken = appData.takenTitles.some(taken => taken.toLowerCase().trim() === title.toLowerCase().trim());
+                    topicsHtml += `<div class="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-100 text-xs"><span class="flex-1 text-slate-700 ${isTaken ? 'line-through text-slate-400' : 'font-semibold'}">${title} ${isTaken ? '<span class="mr-2 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">هەڵبژێردراوە</span>' : ''}</span><button onclick="deleteTopic('${t.name}', '${escapeHtml(title)}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1" title="سڕینەوە">✕</button></div>`;
+                });
+                grid.innerHTML += `<div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between"><div><div class="flex items-center justify-between mb-2"><h4 class="font-bold text-slate-900">${t.academicTitle ? t.academicTitle + " " : ""}${t.name}</h4><span class="px-2 py-0.5 text-[10px] bg-slate-100 text-slate-700 rounded font-bold">${t.email ? 'ئیمەیڵ هەیە' : 'بێ ئیمەیڵ'}</span></div><p class="text-xs text-slate-500 font-mono mb-4">${t.email}</p><div class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">${topicsHtml}</div></div></div>`;
+            });
+        }
+
+        function renderRemainingViews(teachersList, data) {
+            const selectedTeacherNames = data.registrationsList.map(r => r.teacher.trim());
+            const unselectedTeachers = teachersList.filter(t => !selectedTeacherNames.includes(t.name.trim()));
+
+            const registeredNamesLower = data.registeredStudents.map(n => n.toLowerCase().trim());
+            const unregisteredStudents = [];
+            Object.keys(data.studentDb).forEach(email => {
+                const name = data.studentDb[email];
+                if (!registeredNamesLower.includes(name.toLowerCase().trim())) unregisteredStudents.push({ name: name, email: email });
+            });
+
+            document.getElementById('unregisteredStudentsCount').textContent = unregisteredStudents.length;
+            document.getElementById('unselectedTeachersCount').textContent = unselectedTeachers.length;
+
+            const studentsListEl = document.getElementById('unregisteredStudentsList'); studentsListEl.innerHTML = '';
+            if (unregisteredStudents.length === 0) studentsListEl.innerHTML = '<p class="text-sm text-gray-500 p-4 text-center">سەرجەم فێرخوازان تۆمارکراون.</p>';
+            else unregisteredStudents.forEach(s => studentsListEl.innerHTML += `<div class="flex justify-between items-center p-3 border-b border-gray-100 hover:bg-red-50 transition-colors"><span class="font-semibold text-gray-800 text-sm">${s.name}</span><span class="text-xs text-gray-500 font-mono">${s.email}</span></div>`);
+
+            const teachersListEl = document.getElementById('unselectedTeachersList'); teachersListEl.innerHTML = '';
+            if (unselectedTeachers.length === 0) teachersListEl.innerHTML = '<p class="text-sm text-gray-500 p-4 text-center">سەرجەم مامۆستایان هەڵبژێردراون.</p>';
+            else unselectedTeachers.forEach(t => teachersListEl.innerHTML += `<div class="flex justify-between items-center p-3 border-b border-gray-100 hover:bg-blue-50 transition-colors"><span class="font-semibold text-gray-800 text-sm">${t.academicTitle ? t.academicTitle + ' ' : ''}${t.name}</span><span class="text-xs text-blue-600 font-bold bg-blue-100 px-2 py-1 rounded-lg">${t.titles.length} بابەت ماوە</span></div>`);
+        }
+
+        // ==========================================
+        // GRADUATION RESEARCH EVALUATIONS LOGIC
+        // ==========================================
+        function renderEvaluatorDashboard(teachersList, registrations) {
+            const leaderboardContainer = document.getElementById('loadLeaderboardContainer');
+            const selectorsContainer = document.getElementById('evaluationsSelectorContainer');
+
+            leaderboardContainer.innerHTML = '';
+            selectorsContainer.innerHTML = '';
+
+            const workload = {};
+            teachersList.forEach(t => {
+                workload[t.name] = { count: 0, supervising: 0, reviewing: 0, title: t.academicTitle, name: t.name };
+            });
+
+            registrations.forEach(r => {
+                if (workload[r.teacher]) { workload[r.teacher].count++; workload[r.teacher].supervising++; }
+                if (r.reviewer1 && workload[r.reviewer1]) { workload[r.reviewer1].count++; workload[r.reviewer1].reviewing++; }
+                if (r.reviewer2 && workload[r.reviewer2]) { workload[r.reviewer2].count++; workload[r.reviewer2].reviewing++; }
+            });
+
+            const rankedTeachers = Object.values(workload).sort((a, b) => b.count - a.count);
+
+            rankedTeachers.forEach(t => {
+                let badgeColor = "bg-green-100 text-green-800 border-green-300";
+                if (t.count === 2) badgeColor = "bg-yellow-100 text-yellow-800 border-yellow-300";
+                else if (t.count === 3) badgeColor = "bg-orange-100 text-orange-800 border-orange-300";
+                else if (t.count >= 4) badgeColor = "bg-red-100 text-red-800 border-red-300";
+
+                leaderboardContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-3 border border-slate-100 rounded-lg hover:bg-slate-50 transition-all">
+                        <div>
+                            <span class="font-semibold text-slate-800 text-sm">${t.title ? t.title + ' ' : ''}${t.name}</span>
+                            <div class="text-[10px] text-slate-400 mt-0.5">سەرپەرشتیار: ${t.supervising} | هەڵسەنگێنەر: ${t.reviewing}</div>
+                        </div>
+                        <span class="px-3 py-1 border rounded-full text-xs font-bold ${badgeColor}">${t.count} توێژینەوە</span>
+                    </div>`;
+            });
+
+            if (registrations.length === 0) {
+                selectorsContainer.innerHTML = '<div class="p-6 text-center text-slate-400">هیچ گرووپێک تۆمارنەکراوە بۆ تاووتوێکردن.</div>';
+                return;
+            }
+
+            registrations.forEach(r => {
+                let category = "Linguistics";
+                const isLit = appData.teachers.Literature.some(t => t.name === r.teacher);
+                if (isLit) category = "Literature";
+
+                const availableReviewers = teachersList.filter(t => t.name !== r.teacher);
+
+                let rev1Options = `<option value="">دیارینەکراوە</option>`;
+                let rev2Options = `<option value="">دیارینەکراوە</option>`;
+
+                availableReviewers.forEach(t => {
+                    const isSelected1 = r.reviewer1 === t.name ? 'selected' : '';
+                    const isSelected2 = r.reviewer2 === t.name ? 'selected' : '';
+                    const titleText = t.academicTitle ? t.academicTitle + ' ' : '';
+
+                    rev1Options += `<option value="${t.name}" ${isSelected1}>${titleText}${t.name}</option>`;
+                    rev2Options += `<option value="${t.name}" ${isSelected2}>${titleText}${t.name}</option>`;
+                });
+
+                const canNotify = r.reviewer1 && r.reviewer2;
+                const emailBtnClass = canNotify
+                    ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                    : "bg-slate-200 text-slate-400 cursor-not-allowed";
+
+                selectorsContainer.innerHTML += `
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                        <div class="flex justify-between items-start gap-4 border-b pb-3 border-slate-100">
+                            <div class="flex-1">
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">${category}</span>
+                                <h4 class="font-bold text-slate-900 text-sm mt-1.5 select-all">${r.title}</h4>
+                                <p class="text-xs text-slate-500 mt-1">ئەندامان: ${r.groupName}</p>
+                                <p class="text-xs text-slate-600 mt-1 font-semibold">سەرپەرشتیار: ${r.academicTitle ? r.academicTitle + ' ' : ''}${r.teacher}</p>
+                            </div>
+                            <button onclick="sendIndividualEmail(${r.rowIndex})" ${canNotify ? "" : "disabled"} class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${emailBtnClass}">
+                                ✉️ ناردنی ئیمەیڵ
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">هەڵسەنگێنەری یەکەم:</label>
+                                <select onchange="updateEvaluatorAssignment(${r.rowIndex}, this.value, 1)" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    ${rev1Options}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">هەڵسەنگێنەری دووەم:</label>
+                                <select onchange="updateEvaluatorAssignment(${r.rowIndex}, this.value, 2)" class="w-full p-2 border border-slate-300 rounded-lg text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    ${rev2Options}
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function updateEvaluatorAssignment(rowIndex, value, revNumber) {
+            const record = appData.registrationsList.find(r => r.rowIndex === rowIndex);
+            if (!record) return;
+
+            let rev1 = revNumber === 1 ? value : record.reviewer1;
+            let rev2 = revNumber === 2 ? value : record.reviewer2;
+
+            if (rev1 && rev2 && rev1 === rev2) {
+                showModal("ئاگاداری", "ناتوانیت هەمان مامۆستا وەک هەڵسەنگێنەری یەکەم و دووەم بە یەکەوە دابنێیت.", "⚠️", "bg-amber-100 text-amber-600");
+                fetchLatestData();
+                return;
+            }
+
+            showLoader('تۆمارکردنی هەڵسەنگێنەری نوێ لە داتابەیس...');
+            apiCall('assignReviewersAdmin', { rowIndex, reviewer1: rev1, reviewer2: rev2 })
+                .then(() => { fetchLatestData(); })
+                .catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+        }
+
+        function sendIndividualEmail(rowIndex) {
+            showLoader('ناردنی زانیاری و ئاگادارکردنەوە فەرمییەکە بە ئیمەیڵ...');
+            apiCall('sendIndividualEvaluationEmail', { rowIndex })
+                .then(() => {
+                    hideLoader();
+                    showModal("نێردرا", "ئیمەیڵەکە بە سەرکەوتوویی بۆ هەردوو هەڵسەنگێنەرەکە و بەشی ئینگلیزی نێردرا.", "✔️", "bg-green-100 text-green-600");
+                })
+                .catch(err => {
+                    hideLoader();
+                    showModal("شکستی هێنا", err.toString(), "❌", "bg-red-100 text-red-600");
+                });
+        }
+
+        function triggerAutoDistribution() {
+            showLoader('هاوسەنگکردن و دابەشکردنی ئۆتۆماتیکی بابەتەکان...');
+            apiCall('autoDistributeReviewers')
+                .then(() => {
+                    fetchLatestData();
+                    showModal("سەرکەوتوو بوو", "دابەشکاری ئۆتۆماتیکی هەڵسەنگێنەران بە سەرکەوتوویی ئەنجامدرا و لە هەردوو جەدۆلەکەدا هاوسەنگکرا.", "✔️", "bg-green-100 text-green-600");
+                })
+                .catch(err => { hideLoader(); showModal("هەڵە ڕوویدا", err.toString(), "❌", "bg-red-100 text-red-600"); });
+        }
+
+        function addNewTopic() {
+            const teacherName = document.getElementById('teacherSelectInput').value;
+            const newTitle = document.getElementById('newTopicInput').value.trim();
+            if (!teacherName || !newTitle) { showModal("کەمکوڕی هەیە", "تکایە سەرەتا مامۆستا هەڵبژێرە و ناونیشانەکە بنووسە.", "⚠️", "bg-amber-100 text-amber-600"); return; }
+            showLoader('زیادکردنی بابەتەکە لە جەدۆل...');
+            apiCall('addTopicAdmin', { teacherName, newTitle }).then(() => { document.getElementById('newTopicInput').value = ''; fetchLatestData(); showModal("سەرکەوتوو بوو", "ناونیشانی نوێ بە سەرکەوتوویی زیادکرا.", "✔️", "bg-green-100 text-green-600"); }).catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+        }
+
+        function deleteTopic(teacherName, title) {
+            if (!confirm(`ئایا دڵنیایت لە سڕینەوەی ئەم بابەتە:\n"${title}"?`)) return;
+            showLoader('سڕینەوەی ناونیشانەکە لە جەدۆل...');
+            apiCall('deleteTopicAdmin', { teacherName, titleToDelete: title }).then(() => { fetchLatestData(); showModal("سەرکەوتوو بوو", "بابەتەکە بە سەرکەوتوویی سڕایەوە.", "✔️", "bg-green-100 text-green-600"); }).catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+        }
+
+        function renderTakenTitlesTable() {
+            if (!appData) return;
+            const tbody = document.getElementById('takenTitlesTableBody');
+            const countEl = document.getElementById('takenTitlesCount');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const allTeachers = [...appData.teachers.Linguistics, ...appData.teachers.Literature];
+            const takenRows = [];
+            allTeachers.forEach(t => {
+                t.titles.forEach(title => {
+                    const reg = appData.registrationsList.find(r => r.title.toLowerCase().trim() === title.toLowerCase().trim());
+                    if (reg) takenRows.push({ title, teacher: (t.academicTitle ? t.academicTitle + ' ' : '') + t.name, group: reg.groupName });
+                });
+            });
+            countEl.textContent = takenRows.length;
+            if (takenRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-emerald-600 text-sm">هیچ ناونیشانێک تا ئێستا هەڵبژێردراوە نییە.</td></tr>`;
+                return;
+            }
+            takenRows.forEach((row, i) => {
+                tbody.innerHTML += `<tr class="hover:bg-emerald-50 transition-colors">
+                    <td class="px-4 py-2.5 text-xs text-slate-500 font-bold">${i + 1}</td>
+                    <td class="px-4 py-2.5 text-sm font-semibold text-slate-800 italic">${row.title}</td>
+                    <td class="px-4 py-2.5 text-sm text-blue-700 font-bold">${row.teacher}</td>
+                    <td class="px-4 py-2.5 text-xs text-slate-600">${row.group}</td>
+                </tr>`;
+            });
+        }
+
+        // ==========================================
+        // DOWNLOAD: TOPICS (Teachers tab)
+        // ==========================================
+        function downloadTopicsAsExcel() {
+            if (!appData) return;
+            const allTeachers = [...appData.teachers.Linguistics, ...appData.teachers.Literature];
+            let csvRows = ['\uFEFF' + 'مامۆستا,پسپۆڕی,ناونیشانی بابەت,دۆخ'];
+            allTeachers.forEach(t => {
+                const spec = appData.teachers.Linguistics.includes(t) ? 'Linguistics' : 'Literature';
+                t.titles.forEach(title => {
+                    const isTaken = appData.takenTitles.some(tk => tk.toLowerCase().trim() === title.toLowerCase().trim());
+                    const name = (t.academicTitle ? t.academicTitle + ' ' : '') + t.name;
+                    csvRows.push(`"${name}","${spec}","${title}","${isTaken ? 'هەڵبژێردراوە' : 'بەردەستە'}"`);
+                });
+            });
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'بابەتەکانی-سەرپەرشتیاران.csv'; a.click();
+        }
+
+        function downloadTopicsAsWord() {
+            if (!appData) return;
+            const allTeachers = [...appData.teachers.Linguistics, ...appData.teachers.Literature];
+            let rows = '';
+            allTeachers.forEach(t => {
+                const spec = appData.teachers.Linguistics.includes(t) ? 'Linguistics' : 'Literature';
+                const name = (t.academicTitle ? t.academicTitle + ' ' : '') + t.name;
+                t.titles.forEach((title, idx) => {
+                    const isTaken = appData.takenTitles.some(tk => tk.toLowerCase().trim() === title.toLowerCase().trim());
+                    rows += `<tr style="background:${isTaken ? '#f0fdf4' : '#fff'}"><td style="border:1px solid #cbd5e1;padding:8px;text-align:right;">${idx === 0 ? name : ''}</td><td style="border:1px solid #cbd5e1;padding:8px;text-align:right;">${idx === 0 ? spec : ''}</td><td style="border:1px solid #cbd5e1;padding:8px;text-align:right;font-style:italic;">${title}</td><td style="border:1px solid #cbd5e1;padding:8px;text-align:center;color:${isTaken ? '#16a34a' : '#64748b'};">${isTaken ? '✅ هەڵبژێردراوە' : '🔵 بەردەستە'}</td></tr>`;
+                });
+            });
+            const html = `<html><head><meta charset="UTF-8"></head><body dir="rtl" style="font-family:Tahoma,sans-serif;padding:30px;">
+                <h2 style="text-align:center;color:#1e40af;">بەشی زمانی ئینگلیزی - لیستی بابەتەکان</h2>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead><tr style="background:#1e293b;color:#fff;">
+                    <th style="border:1px solid #cbd5e1;padding:10px;text-align:right;">مامۆستا</th>
+                    <th style="border:1px solid #cbd5e1;padding:10px;text-align:right;">پسپۆڕی</th>
+                    <th style="border:1px solid #cbd5e1;padding:10px;text-align:right;">ناونیشانی بابەت</th>
+                    <th style="border:1px solid #cbd5e1;padding:10px;text-align:center;">دۆخ</th>
+                </tr></thead><tbody>${rows}</tbody></table></body></html>`;
+            const blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8;' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'بابەتەکانی-سەرپەرشتیاران.doc'; a.click();
+        }
+
+        // ==========================================
+        // DOWNLOAD: REGISTRATIONS (Tab 1) — NEW
+        // ==========================================
+        function downloadRegistrationsAsExcel() {
+            if (!appData) return;
+            const data = appData.registrationsList || [];
+            if (!data.length) { showModal("زانیاری نییە", "هیچ گرووپێک تۆمار نەکراوە تا ئێستا.", "⚠️", "bg-amber-100 text-amber-600"); return; }
+
+            const headers = ['#', 'ناوی گرووپ (ئەندامان)', 'ناونیشانی زانستی', 'سەرپەرشتیار / مامۆستا', 'ناونیشانی توێژینەوە', 'هەڵسەنگێنەری یەکەم', 'هەڵسەنگێنەری دووەم', 'کاتی تۆمارکردن'];
+            const rows = data.map((r, i) => [
+                i + 1,
+                r.groupName || '',
+                r.academicTitle || '',
+                r.teacher || '',
+                r.title || '',
+                r.reviewer1 || '---',
+                r.reviewer2 || '---',
+                r.timestamp || ''
+            ]);
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+            // Column widths
+            ws['!cols'] = [
+                {wch:4}, {wch:36}, {wch:18}, {wch:26},
+                {wch:44}, {wch:24}, {wch:24}, {wch:20}
+            ];
+
+            // RTL direction
+            if (!ws['!sheetViews']) ws['!sheetViews'] = [{}];
+            ws['!sheetViews'][0].rightToLeft = true;
+
+            XLSX.utils.book_append_sheet(wb, ws, 'گرووپە تۆمارکراوەکان');
+            XLSX.writeFile(wb, 'لیستی-گرووپە-تۆمارکراوەکان.xlsx');
+        }
+
+        function downloadRegistrationsAsWord() {
+            if (!appData) return;
+            const data = appData.registrationsList || [];
+            if (!data.length) { showModal("زانیاری نییە", "هیچ گرووپێک تۆمار نەکراوە تا ئێستا.", "⚠️", "bg-amber-100 text-amber-600"); return; }
+
+            const now = new Date().toLocaleDateString('ar-IQ');
+
+            const tableRows = data.map((r, i) => `
+                <tr>
+                    <td style="text-align:center;color:#6b7280;font-size:10pt;">${i + 1}</td>
+                    <td style="font-weight:bold;color:#1e3a8a;">${r.groupName || ''}</td>
+                    <td style="text-align:center;">${r.academicTitle || ''}</td>
+                    <td style="text-align:center;font-weight:bold;">${r.teacher || ''}</td>
+                    <td style="font-style:italic;color:#374151;">${r.title || ''}</td>
+                </tr>`).join('');
+
+            const doc = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<meta name=ProgId content=Word.Document>
+<style>
+    @page { size: A4 landscape; margin: 1.5cm 2cm; }
+    body { direction: rtl; font-family: 'Arial', 'Tahoma', sans-serif; font-size: 11pt; color: #1a1a2e; }
+    .header-univ { text-align:center; font-size:13pt; font-weight:bold; color:#1e3a8a; margin-bottom:2px; }
+    .header-dept  { text-align:center; font-size:11pt; color:#374151; margin-top:0; }
+    .title-line   { text-align:center; font-size:14pt; font-weight:bold; color:#111827; margin:10px 0 2px; border-bottom:3px solid #1e3a8a; padding-bottom:6px; }
+    .date-line    { text-align:center; color:#6b7280; font-size:9.5pt; margin-bottom:18px; }
+    table { width:100%; border-collapse:collapse; font-size:10pt; }
+    thead th {
+        background-color:#1e3a8a; color:#ffffff;
+        padding:10px 6px; text-align:center;
+        border:1px solid #1e40af; font-weight:bold; font-size:10.5pt;
+    }
+    tbody td { padding:8px 6px; border:1px solid #cbd5e1; vertical-align:middle; }
+    tbody tr:nth-child(even) td { background-color:#eff6ff; }
+    tbody tr:nth-child(odd)  td { background-color:#ffffff; }
+    .footer { text-align:center; margin-top:28px; color:#6b7280; font-size:9pt; border-top:1px solid #e5e7eb; padding-top:10px; }
+</style>
+</head>
+<body>
+    <p class="header-univ">زانکۆی ڕاپەڕین — کۆلێژی پەروەردەی بنەڕەت</p>
+    <p class="header-dept">بەشی زمانی ئینگلیزی / English Language Department</p>
+    <p class="title-line">لیستی سەرجەم گرووپە تۆمارکراوەکان</p>
+    <p class="date-line">بەرواری دەرکردن: ${now} &nbsp;|&nbsp; کۆی گرووپەکان: ${data.length}</p>
+    <table>
+        <thead>
+            <tr>
+                <th width="3%">#</th>
+                <th width="20%">ناوی گرووپ (ئەندامان)</th>
+                <th width="9%">ناونیشانی زانستی</th>
+                <th width="15%">سەرپەرشتیار</th>
+                <th width="53%">ناونیشانی توێژینەوە</th>
+            </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+    </table>
+    <div class="footer">
+        <p>لیژنەی زانستی بەشی زمانی ئینگلیزی — کۆلێژی پەروەردەی بنەڕەت — ڕانیە</p>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob(['\ufeff' + doc], { type: 'application/msword;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = 'لیستی-گرووپە-تۆمارکراوەکان.doc';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // SHARED MODALS
+        // ==========================================
+        function showModal(title, body, icon, iconColors) {
+            document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').textContent = body;
+            const iconDiv = document.getElementById('modalIcon'); iconDiv.textContent = icon;
+            iconDiv.className = `w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full text-3xl ${iconColors}`;
+            document.getElementById('messageModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('messageModal').classList.add('hidden'); }
+        function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+    </script>
+</body>
+</html>
