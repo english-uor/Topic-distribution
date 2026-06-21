@@ -18,15 +18,11 @@
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center justify-center">
 
-    <!-- Global Shared Loader -->
     <div id="globalLoader" class="fixed inset-0 bg-white/95 z-[99] flex flex-col items-center justify-center p-6 hidden">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
         <p class="text-gray-700 font-semibold text-lg" id="loaderText">چاوەڕوان بە...</p>
     </div>
 
-    <!-- ========================================== -->
-    <!-- LOGIN SELECTOR                             -->
-    <!-- ========================================== -->
     <div id="loginSelector" class="max-w-sm w-full bg-white rounded-2xl shadow-xl overflow-hidden mb-4">
         <div class="bg-gradient-to-r from-blue-700 to-slate-800 p-5 text-white text-center">
             <p class="text-xs uppercase tracking-wider opacity-80 font-semibold mb-1">زانکۆی ڕاپەڕین - بەشی زمانی ئینگلیزی</p>
@@ -46,9 +42,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- STUDENT REGISTRATION VIEW                  -->
-    <!-- ========================================== -->
     <div id="registrationView" class="max-w-xl w-full bg-white rounded-2xl shadow-xl overflow-hidden relative hidden">
         <div class="bg-blue-600 p-6 text-white text-center">
             <p class="text-sm uppercase tracking-wider opacity-90 font-semibold mb-1">زانکۆی ڕاپەڕین - بەشی زمانی ئینگلیزی</p>
@@ -114,9 +107,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- ADMIN DASHBOARD VIEW                       -->
-    <!-- ========================================== -->
     <div id="adminView" class="hidden max-w-7xl w-full mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
         <div class="bg-slate-900 p-6 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800">
             <div>
@@ -153,15 +143,12 @@
         </div>
 
         <div class="p-6">
-            <!-- Admin Tab 1: Registrations -->
             <div id="tab_registrations" class="space-y-4">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <h3 class="text-lg font-bold text-slate-800">لیستی سەرجەم گرووپە تۆمارکراوەکان</h3>
                     <div class="flex flex-wrap items-center gap-2">
-                        <!-- ===== DOWNLOAD BUTTONS ===== -->
                         <button onclick="downloadRegistrationsAsExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">📊 داگرتن بە Excel</button>
                         <button onclick="downloadRegistrationsAsWord()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">📄 داگرتن بە Word</button>
-                        <!-- ============================= -->
                         <input type="text" id="regSearch" oninput="filterRegistrations()" placeholder="گەڕان بەپێی سەرۆک، بابەت، یان مامۆستا..." class="p-2 border border-slate-300 rounded-lg text-sm w-full md:w-80 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
@@ -182,7 +169,6 @@
                 </div>
             </div>
 
-            <!-- Admin Tab 2: Evaluators -->
             <div id="tab_evaluators" class="space-y-6 hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-100 p-4 rounded-xl border border-slate-200">
                     <div>
@@ -195,26 +181,18 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Column: Registered Titles Table with Evaluator Dropdowns & Email Triggers -->
                     <div class="lg:col-span-2 space-y-4">
                         <h3 class="font-bold text-slate-800 text-base">دیاریکردنی هەڵسەنگێنەر بۆ گرووپەکان</h3>
-                        <div class="space-y-3 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar" id="evaluationsSelectorContainer">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="space-y-3 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar" id="evaluationsSelectorContainer"></div>
                     </div>
-
-                    <!-- Right Column: Load Leaderboard with Dynamic Color Grades -->
                     <div class="space-y-4">
                         <h3 class="font-bold text-slate-800 text-base">ڕیزبەندی لۆدی مامۆستایان (سەرپەرشتی + هەڵسەنگاندن)</h3>
                         <p class="text-xs text-slate-500">ڕەنگەکە بەپێی کەم و زۆری لۆدی سەرپەرشتی و هەڵسەنگاندن لە سەوزەوە بۆ سوور دەگۆڕێت.</p>
-                        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3" id="loadLeaderboardContainer">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3" id="loadLeaderboardContainer"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Admin Tab 3: Teachers -->
             <div id="tab_teachers" class="space-y-6 hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
                     <div>
@@ -228,7 +206,6 @@
                     </div>
                 </div>
 
-                <!-- Taken Titles Table -->
                 <div class="bg-emerald-50 border border-emerald-200 rounded-xl overflow-hidden shadow-sm">
                     <div class="flex items-center justify-between px-5 py-3 bg-emerald-100 border-b border-emerald-200">
                         <h3 class="font-bold text-emerald-900 text-sm flex items-center gap-2">✅ ناونیشانە جێگیرکراوەکان</h3>
@@ -261,7 +238,6 @@
                 </div>
             </div>
 
-            <!-- Admin Tab 4: Unregistered / Remaining -->
             <div id="tab_remaining" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
@@ -284,7 +260,6 @@
         </div>
     </div>
 
-    <!-- Admin PIN Modal -->
     <div id="adminPinModal" class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl p-7 max-w-xs w-full text-center shadow-2xl">
             <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center rounded-full bg-slate-100 text-4xl">🔒</div>
@@ -299,7 +274,6 @@
         </div>
     </div>
 
-    <!-- Shared Message Modal -->
     <div id="messageModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center shadow-2xl">
             <div id="modalIcon" class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full text-3xl"></div>
@@ -310,27 +284,35 @@
     </div>
 
     <script>
+        // ==========================================
+        // GITHUB PAGES CONFIGURATION
+        // ==========================================
+        // REPLACE THIS URL WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMuh5lgB01VT4ZC2JDIskCym8qY_JqwuQBF4TGarUFe7j8jfMr4mDKBatWB_uLFEPV-g/exec';
+
+        /**
+         * Replaces google.script.run for GitHub Pages.
+         * Communicates securely via Fetch POST with the text/plain payload workaround 
+         * to prevent CORS preflight blockages by Google Apps Script.
+         */
+        async function callBackend(action, parameters = {}) {
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action, parameters })
+                });
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+                return result.data;
+            } catch (error) {
+                console.error(`Error executing ${action}:`, error);
+                throw error;
+            }
+        }
+
         let appData = null;
-        const ADMIN_EMAIL = 'admin@english.edu';
-
-        // --- NEW API CONFIGURATION ---
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyp4F7KVbT8RhRyEY0DlYT0ROX0Jtel2oAvhNwCD6Fdjd-nH1cNWvyKePf5vte3hAvTKQ/exec";
-
-        const apiCall = async (action, payload = {}) => {
-          try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-              method: 'POST',
-              body: JSON.stringify({ action, payload })
-            });
-            const result = await response.json();
-            if (result && result.error) throw new Error(result.error);
-            return result;
-          } catch (error) {
-            console.error("API Error:", error);
-            throw error;
-          }
-        };
-        // -----------------------------
+        let ADMIN_EMAIL = '';
         let currentStep = 1, selectedCat = '', selectedTitle = null, selectedTeacher = null, selectedTeacherTitle = '';
         let adminTab = 'registrations';
 
@@ -350,13 +332,22 @@
 
         function checkAdminPin() {
             const pin = document.getElementById('adminPinInput').value.trim();
-            if (pin === 'admin@english.edu' || pin === '2025admin') {
-                document.getElementById('adminPinModal').classList.add('hidden');
-                document.getElementById('adminPinInput').value = '';
-                showAdminView();
-            } else {
-                document.getElementById('adminPinError').classList.remove('hidden');
-            }
+            showLoader('چاوەڕوان بە...');
+            callBackend('verifyAdminPin', { pin })
+                .then(isValid => {
+                    hideLoader();
+                    if (isValid) {
+                        document.getElementById('adminPinModal').classList.add('hidden');
+                        document.getElementById('adminPinInput').value = '';
+                        showAdminView();
+                    } else {
+                        document.getElementById('adminPinError').classList.remove('hidden');
+                    }
+                })
+                .catch(err => {
+                    hideLoader();
+                    document.getElementById('adminPinError').classList.remove('hidden');
+                });
         }
 
         // ==========================================
@@ -365,20 +356,20 @@
         function showLoader(text) { document.getElementById('loaderText').textContent = text; document.getElementById('globalLoader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('globalLoader').style.display = 'none'; }
 
-        function submit() {
-            const payload = { email1: document.getElementById('email1').value.trim(), email2: document.getElementById('email2').value.trim(), email3: document.getElementById('email3').value.trim(), category: selectedCat, teacher: selectedTeacher, title: selectedTitle };
-            showLoader('ناردنی زانیارییەکان و تۆمارکردن...');
-            apiCall('submitRegistration', { payload }).then(() => {
-                hideLoader(); showModal("تۆمارکردن سەرکەوتوو بوو", "گرووپەکەتان بە سەرکەوتوویی تۆمارکرا و ئیمەیڵتان بۆ نێردرا!", "✔️", "bg-green-100 text-green-600");
-                ['email1', 'email2', 'email3'].forEach(id => document.getElementById(id).value = '');
-                ['nameLabel1', 'nameLabel2', 'nameLabel3'].forEach(id => document.getElementById(id).textContent = '');
-                selectedCat = ''; selectedTitle = null; selectedTeacher = null; selectedTeacherTitle = ''; currentStep = 1;
-                document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active');
-                document.getElementById('teacherDisplay').classList.add('hidden');
-                updateUI(); fetchLatestData();
-            }).catch(err => { 
-                hideLoader(); showModal("هەڵە ڕوویدا", "تۆمارکردن سەرکەوتوو نەبوو: " + err.toString(), "❌", "bg-red-100 text-red-600"); 
-            });
+        function fetchLatestData() {
+            showLoader('بارکردنی زانیارییەکان...');
+            callBackend('getAppData')
+                .then(d => {
+                    appData = d;
+                    ADMIN_EMAIL = appData.adminEmail;
+                    renderDashboard();
+                    updateAdminVisibilityToggle();
+                    hideLoader();
+                })
+                .catch(err => {
+                    hideLoader();
+                    showModal("هەڵە", "نەتوانرا زانیارییەکان بهێنرێت: " + err.message, "❌", "bg-red-100 text-red-600");
+                });
         }
 
         // ==========================================
@@ -511,15 +502,19 @@
         function submit() {
             const payload = { email1: document.getElementById('email1').value.trim(), email2: document.getElementById('email2').value.trim(), email3: document.getElementById('email3').value.trim(), category: selectedCat, teacher: selectedTeacher, title: selectedTitle };
             showLoader('ناردنی زانیارییەکان و تۆمارکردن...');
-            google.script.run.withSuccessHandler(() => {
-                hideLoader(); showModal("تۆمارکردن سەرکەوتوو بوو", "گرووپەکەتان بە سەرکەوتوویی تۆمارکرا و ئیمەیڵتان بۆ نێردرا!", "✔️", "bg-green-100 text-green-600");
-                ['email1', 'email2', 'email3'].forEach(id => document.getElementById(id).value = '');
-                ['nameLabel1', 'nameLabel2', 'nameLabel3'].forEach(id => document.getElementById(id).textContent = '');
-                selectedCat = ''; selectedTitle = null; selectedTeacher = null; selectedTeacherTitle = ''; currentStep = 1;
-                document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active');
-                document.getElementById('teacherDisplay').classList.add('hidden');
-                updateUI(); fetchLatestData();
-            }).withFailureHandler(err => { hideLoader(); showModal("هەڵە ڕوویدا", "تۆمارکردن سەرکەوتوو نەبوو: " + err, "❌", "bg-red-100 text-red-600"); }).submitRegistration(payload);
+            callBackend('submitRegistration', { payload })
+                .then(() => {
+                    hideLoader(); showModal("تۆمارکردن سەرکەوتوو بوو", "گرووپەکەتان بە سەرکەوتوویی تۆمارکرا و ئیمەیڵتان بۆ نێردرا!", "✔️", "bg-green-100 text-green-600");
+                    ['email1', 'email2', 'email3'].forEach(id => document.getElementById(id).value = '');
+                    ['nameLabel1', 'nameLabel2', 'nameLabel3'].forEach(id => document.getElementById(id).textContent = '');
+                    selectedCat = ''; selectedTitle = null; selectedTeacher = null; selectedTeacherTitle = ''; currentStep = 1;
+                    document.querySelectorAll('.step-container').forEach(c => c.classList.remove('active')); document.getElementById('step1').classList.add('active');
+                    document.getElementById('teacherDisplay').classList.add('hidden');
+                    updateUI(); fetchLatestData();
+                })
+                .catch(err => {
+                    hideLoader(); showModal("هەڵە ڕوویدا", "تۆمارکردن سەرکەوتوو نەبوو: " + err.message, "❌", "bg-red-100 text-red-600"); 
+                });
         }
 
         // ==========================================
@@ -527,7 +522,6 @@
         // ==========================================
         function showAdminView() {
             document.body.classList.replace('bg-f3f4f6', 'bg-slate-50');
-            // FIX: hide the login selector when entering admin panel
             document.getElementById('loginSelector').classList.add('hidden');
             document.getElementById('registrationView').classList.add('hidden');
             document.getElementById('adminView').classList.remove('hidden');
@@ -559,14 +553,14 @@
             if (!appData) return;
             const newState = !appData.hideTeachers;
             showLoader('گۆڕینی دۆخی دەرکەوتنی مامۆستایان...');
-            apiCall('setTeacherVisibility', { isHidden: newState })
+            callBackend('setTeacherVisibility', { newState })
                 .then((res) => {
                     appData.hideTeachers = res;
                     updateAdminVisibilityToggle();
                     hideLoader();
                     showModal("سەرکەوتوو بوو", newState ? "ناوی مامۆستایان شاردرایەوە لە فێرخوازان لە کاتی هەڵبژاردنی ناونیشان." : "ناوی مامۆستایان ئاشکرا کرا بۆ فێرخوازان.", "✔️", "bg-green-100 text-green-600");
                 })
-                .catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+                .catch(err => { hideLoader(); showModal("هەڵە", err.message, "❌", "bg-red-100 text-red-600"); });
         }
 
         function switchTab(tabId) {
@@ -759,32 +753,32 @@
             }
 
             showLoader('تۆمارکردنی هەڵسەنگێنەری نوێ لە داتابەیس...');
-            apiCall('assignReviewersAdmin', { rowIndex, reviewer1: rev1, reviewer2: rev2 })
+            callBackend('assignReviewersAdmin', { rowIndex: rowIndex, rev1: rev1, rev2: rev2 })
                 .then(() => { fetchLatestData(); })
-                .catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+                .catch(err => { hideLoader(); showModal("هەڵە", err.message, "❌", "bg-red-100 text-red-600"); });
         }
 
         function sendIndividualEmail(rowIndex) {
             showLoader('ناردنی زانیاری و ئاگادارکردنەوە فەرمییەکە بە ئیمەیڵ...');
-            apiCall('sendIndividualEvaluationEmail', { rowIndex })
+            callBackend('sendIndividualEvaluationEmail', { rowIndex: rowIndex })
                 .then(() => {
                     hideLoader();
                     showModal("نێردرا", "ئیمەیڵەکە بە سەرکەوتوویی بۆ هەردوو هەڵسەنگێنەرەکە و بەشی ئینگلیزی نێردرا.", "✔️", "bg-green-100 text-green-600");
                 })
                 .catch(err => {
                     hideLoader();
-                    showModal("شکستی هێنا", err.toString(), "❌", "bg-red-100 text-red-600");
+                    showModal("شکستی هێنا", err.message, "❌", "bg-red-100 text-red-600");
                 });
         }
 
         function triggerAutoDistribution() {
             showLoader('هاوسەنگکردن و دابەشکردنی ئۆتۆماتیکی بابەتەکان...');
-            apiCall('autoDistributeReviewers')
+            callBackend('autoDistributeReviewers')
                 .then(() => {
                     fetchLatestData();
                     showModal("سەرکەوتوو بوو", "دابەشکاری ئۆتۆماتیکی هەڵسەنگێنەران بە سەرکەوتوویی ئەنجامدرا و لە هەردوو جەدۆلەکەدا هاوسەنگکرا.", "✔️", "bg-green-100 text-green-600");
                 })
-                .catch(err => { hideLoader(); showModal("هەڵە ڕوویدا", err.toString(), "❌", "bg-red-100 text-red-600"); });
+                .catch(err => { hideLoader(); showModal("هەڵە ڕوویدا", err.message, "❌", "bg-red-100 text-red-600"); });
         }
 
         function addNewTopic() {
@@ -792,13 +786,17 @@
             const newTitle = document.getElementById('newTopicInput').value.trim();
             if (!teacherName || !newTitle) { showModal("کەمکوڕی هەیە", "تکایە سەرەتا مامۆستا هەڵبژێرە و ناونیشانەکە بنووسە.", "⚠️", "bg-amber-100 text-amber-600"); return; }
             showLoader('زیادکردنی بابەتەکە لە جەدۆل...');
-            apiCall('addTopicAdmin', { teacherName, newTitle }).then(() => { document.getElementById('newTopicInput').value = ''; fetchLatestData(); showModal("سەرکەوتوو بوو", "ناونیشانی نوێ بە سەرکەوتوویی زیادکرا.", "✔️", "bg-green-100 text-green-600"); }).catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+            callBackend('addTopicAdmin', { teacherName: teacherName, newTitle: newTitle })
+                .then(() => { document.getElementById('newTopicInput').value = ''; fetchLatestData(); showModal("سەرکەوتوو بوو", "ناونیشانی نوێ بە سەرکەوتوویی زیادکرا.", "✔️", "bg-green-100 text-green-600"); })
+                .catch(err => { hideLoader(); showModal("هەڵە", err.message, "❌", "bg-red-100 text-red-600"); });
         }
 
         function deleteTopic(teacherName, title) {
             if (!confirm(`ئایا دڵنیایت لە سڕینەوەی ئەم بابەتە:\n"${title}"?`)) return;
             showLoader('سڕینەوەی ناونیشانەکە لە جەدۆل...');
-            apiCall('deleteTopicAdmin', { teacherName, titleToDelete: title }).then(() => { fetchLatestData(); showModal("سەرکەوتوو بوو", "بابەتەکە بە سەرکەوتوویی سڕایەوە.", "✔️", "bg-green-100 text-green-600"); }).catch(err => { hideLoader(); showModal("هەڵە", err.toString(), "❌", "bg-red-100 text-red-600"); });
+            callBackend('deleteTopicAdmin', { teacherName: teacherName, title: title })
+                .then(() => { fetchLatestData(); showModal("سەرکەوتوو بوو", "بابەتەکە بە سەرکەوتوویی سڕایەوە.", "✔️", "bg-green-100 text-green-600"); })
+                .catch(err => { hideLoader(); showModal("هەڵە", err.message, "❌", "bg-red-100 text-red-600"); });
         }
 
         function renderTakenTitlesTable() {
@@ -927,6 +925,9 @@
                     <td style="text-align:center;">${r.academicTitle || ''}</td>
                     <td style="text-align:center;font-weight:bold;">${r.teacher || ''}</td>
                     <td style="font-style:italic;color:#374151;">${r.title || ''}</td>
+                    <td style="text-align:center;color:#0369a1;">${r.reviewer1 || '---'}</td>
+                    <td style="text-align:center;color:#0369a1;">${r.reviewer2 || '---'}</td>
+                    <td style="text-align:center;font-size:9pt;color:#6b7280;">${r.timestamp || ''}</td>
                 </tr>`).join('');
 
             const doc = `
@@ -966,8 +967,11 @@
                 <th width="3%">#</th>
                 <th width="20%">ناوی گرووپ (ئەندامان)</th>
                 <th width="9%">ناونیشانی زانستی</th>
-                <th width="15%">سەرپەرشتیار</th>
-                <th width="53%">ناونیشانی توێژینەوە</th>
+                <th width="12%">سەرپەرشتیار</th>
+                <th width="27%">ناونیشانی توێژینەوە</th>
+                <th width="10%">هەڵسەنگێنەری یەکەم</th>
+                <th width="10%">هەڵسەنگێنەری دووەم</th>
+                <th width="9%">کاتی تۆمارکردن</th>
             </tr>
         </thead>
         <tbody>${tableRows}</tbody>
